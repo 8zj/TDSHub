@@ -27,7 +27,7 @@ local Config = {
     Colors = {
         Tint = Color3.fromRGB(0, 0, 0),         -- Dark Dimmer (Black)
         CardBackground = Color3.fromRGB(20, 20, 25), -- Card Background (slightly darker)
-        Accent = Color3.fromRGB(255, 60, 140),   -- Hot Pink
+        Accent = Color3.fromRGB(255, 60, 140),   -- Hot Pink (Default)
         Text = Color3.fromRGB(255, 255, 255),
         SubText = Color3.fromRGB(255, 255, 255)  -- Brighter SubText
     },
@@ -35,6 +35,13 @@ local Config = {
     TintTransparency = 0.4,
     CardTransparency = 0.1
 }
+
+-- Theme System
+local ThemeObjects = {}
+local function RegisterTheme(obj, prop)
+    table.insert(ThemeObjects, {Object = obj, Property = prop})
+    return obj
+end
 
 -- Shared Snow Function
 local function SpawnSnow(container)
@@ -118,6 +125,7 @@ CardStroke.Color = Config.Colors.Accent
 CardStroke.Thickness = 1
 CardStroke.Transparency = 1
 CardStroke.Parent = MainCard
+RegisterTheme(CardStroke, "Color")
 
 -- Title
 local Title = Instance.new("TextLabel")
@@ -167,6 +175,7 @@ BarFill.BackgroundColor3 = Config.Colors.Accent
 BarFill.BackgroundTransparency = 1
 BarFill.BorderSizePixel = 0
 BarFill.Parent = BarBackground
+RegisterTheme(BarFill, "BackgroundColor3")
 
 local FillCorner = Instance.new("UICorner")
 FillCorner.CornerRadius = UDim.new(1, 0)
@@ -184,6 +193,7 @@ Glow.ScaleType = Enum.ScaleType.Slice
 Glow.SliceCenter = Rect.new(100, 100, 100, 100)
 Glow.SliceScale = 0.5
 Glow.Parent = BarFill
+RegisterTheme(Glow, "ImageColor3")
 
 -- Animation Logic
 local function animate()
@@ -249,7 +259,10 @@ end
         AutoDJ = false, AutoChain = false, AutoSkip = false,
         AntiLag = false, AutoPickups = false, AntiAFK = false, Timescale = 0,
         ClaimRewards = false, SendWebhook = false,
-        WebhookURL = ""
+        WebhookURL = "",
+        -- New Settings
+        ThemeR = 255, ThemeG = 60, ThemeB = 140,
+        LoggerExternal = false
     }
 
 
@@ -290,6 +303,9 @@ end
     end
 
     InitializeSettings()
+
+    -- Apply saved theme
+    Config.Colors.Accent = Color3.fromRGB(Settings.ThemeR, Settings.ThemeG, Settings.ThemeB)
 
     local function SaveSettings()
         if writefile then writefile(FileName, HttpService:JSONEncode(Settings)) end
@@ -337,6 +353,7 @@ end
     ToggleStroke.Color = Config.Colors.Accent
     ToggleStroke.Thickness = 1
     ToggleStroke.Parent = ToggleBtn
+    RegisterTheme(ToggleStroke, "Color")
 
     -- Background & Snow
     local HubBackground = Instance.new("Frame")
@@ -379,13 +396,15 @@ end
     WinStroke.Thickness = 1
     WinStroke.Transparency = 0.5
     WinStroke.Parent = Window
+    RegisterTheme(WinStroke, "Color")
 
     -- Window Title
     local WinTitle = Instance.new("TextLabel")
     WinTitle.Size = UDim2.new(1, -20, 0, 40)
     WinTitle.Position = UDim2.new(0, 20, 0, 0)
     WinTitle.BackgroundTransparency = 1
-    WinTitle.Text = "[ Auto-Strat ] <font color=\"rgb(255, 60, 140)\">Boosters</font>"
+    local hexColor = string.format("#%02x%02x%02x", Settings.ThemeR, Settings.ThemeG, Settings.ThemeB)
+    WinTitle.Text = "[ Auto-Strat ] <font color=\"" .. hexColor .. "\">Boosters</font>"
     WinTitle.RichText = true
     WinTitle.TextColor3 = Config.Colors.Text
     WinTitle.TextXAlignment = Enum.TextXAlignment.Left
@@ -511,6 +530,7 @@ end
         local ns = Instance.new("UIStroke")
         ns.Color = Config.Colors.Accent
         ns.Parent = Notif
+        RegisterTheme(ns, "Color") -- Register notification stroke
         
         task.delay(3, function()
             TweenService:Create(Notif, TweenInfo.new(0.5), {TextTransparency = 1, BackgroundTransparency = 1}):Play()
@@ -547,7 +567,7 @@ end
     Avatar.Position = UDim2.new(0, 2, 0, 2)
     Avatar.BackgroundTransparency = 1
     Avatar.Image = "rbxthumb://type=AvatarHeadShot&id=" .. Player.UserId .. "&w=150&h=150"
-    Avatar.ImageColor3 = Color3.fromRGB(255, 255, 255) -- Ensure image is fully visible
+    Avatar.ImageColor3 = Color3.fromRGB(255, 255, 255)
     Avatar.ImageTransparency = 0
     Avatar.Parent = AvatarContainer
 
@@ -559,6 +579,7 @@ end
     AvatarStroke.Color = Config.Colors.Accent
     AvatarStroke.Thickness = 2
     AvatarStroke.Parent = Avatar
+    RegisterTheme(AvatarStroke, "Color")
 
     local WelcomeTitle = Instance.new("TextLabel")
     WelcomeTitle.Size = UDim2.new(1, 0, 0, 30)
@@ -577,7 +598,7 @@ end
     WelcomeSub.Size = UDim2.new(1, 0, 0, 20)
     WelcomeSub.Position = UDim2.new(0, 0, 0.55, 30)
     WelcomeSub.BackgroundTransparency = 1
-    WelcomeSub.Text = "to PickHub [ <font color=\"rgb(255, 60, 140)\">Boosters</font> ]"
+    WelcomeSub.Text = "to PickHub [ <font color=\"" .. hexColor .. "\">Boosters</font> ]"
     WelcomeSub.RichText = true
     WelcomeSub.TextColor3 = Config.Colors.Text
     WelcomeSub.Font = Enum.Font.Gotham
@@ -597,6 +618,14 @@ end
     LoggerPage.Visible = false
     LoggerPage.Parent = ContentArea
     
+    -- Logger External Support
+    local LoggerStroke = Instance.new("UIStroke")
+    LoggerStroke.Color = Config.Colors.Accent
+    LoggerStroke.Thickness = 1
+    LoggerStroke.Transparency = 1 -- Initially hidden
+    LoggerStroke.Parent = LoggerPage
+    RegisterTheme(LoggerStroke, "Color")
+
     local LogLayout = Instance.new("UIListLayout")
     LogLayout.Parent = LoggerPage
     LogLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -654,6 +683,22 @@ end
     local ConfigLayout = Instance.new("UIListLayout")
     ConfigLayout.Padding = UDim.new(0, 5)
     ConfigLayout.Parent = ConfigPage
+    
+    local SettingsPage = Instance.new("ScrollingFrame")
+    SettingsPage.Name = "Settings"
+    SettingsPage.Size = UDim2.new(1, 0, 1, 0)
+    SettingsPage.BackgroundTransparency = 1
+    SettingsPage.ScrollBarThickness = 4
+    SettingsPage.Visible = false
+    SettingsPage.Parent = ContentArea
+    
+    local SettingsLayout = Instance.new("UIListLayout")
+    SettingsLayout.Padding = UDim.new(0, 5)
+    SettingsLayout.Parent = SettingsPage
+
+    -- Global Active Tab Tracker
+    local ActiveTabButton = nil
+    local ActiveTabStroke = nil
 
     local function CreateTabBtn(name, page)
         local btn = Instance.new("TextButton")
@@ -684,26 +729,60 @@ end
             end
             page.Visible = true
             
+            -- Reset all tabs
             for _, child in pairs(TabContainer:GetChildren()) do
                 if child:IsA("TextButton") and child:FindFirstChild("UIStroke") then
                     child.UIStroke.Color = Color3.fromRGB(60, 60, 60)
                     child.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
                 end
             end
+            
+            -- Set Active
             stroke.Color = Config.Colors.Accent
             btn.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+            
+            ActiveTabButton = btn
+            ActiveTabStroke = stroke
         end)
     end
 
     CreateTabBtn("Welcome", WelcomePage)
     CreateTabBtn("Logger", LoggerPage)
-
-    local function CreateToggle(name, configKey)
+    CreateTabBtn("Settings", SettingsPage)
+    CreateTabBtn("Config", ConfigPage) -- Re-added as requested "Main menu has a settings tab" (and implying restore config)
+    
+    -- Function to update theme dynamically
+    local function UpdateTheme()
+        local c = Color3.fromRGB(Settings.ThemeR, Settings.ThemeG, Settings.ThemeB)
+        Config.Colors.Accent = c
+        
+        for _, item in ipairs(ThemeObjects) do
+            if item.Object and item.Object.Parent then
+                item.Object[item.Property] = c
+            end
+        end
+        
+        -- Update RichText strings
+        local h = string.format("#%02x%02x%02x", Settings.ThemeR, Settings.ThemeG, Settings.ThemeB)
+        WinTitle.Text = "[ Auto-Strat ] <font color=\"" .. h .. "\">Boosters</font>"
+        WelcomeSub.Text = "to PickHub [ <font color=\"" .. h .. "\">Boosters</font> ]"
+        
+        -- Update Active Tab
+        if ActiveTabStroke then
+            ActiveTabStroke.Color = c
+        end
+        
+        SaveSettings()
+    end
+    
+    -- Create Toggle Helper
+    local function CreateToggle(name, configKey, parent)
+        parent = parent or ConfigPage
         local frame = Instance.new("Frame")
         frame.Size = UDim2.new(1, 0, 0, 35)
         frame.BackgroundTransparency = 1
         frame.BackgroundColor3 = Color3.new(0,0,0)
-        frame.Parent = ConfigPage
+        frame.Parent = parent
         
         local label = Instance.new("TextLabel")
         label.Size = UDim2.new(0.7, 0, 1, 0)
@@ -727,19 +806,216 @@ end
         btn.ZIndex = 5
         btn.Parent = frame
         
+        -- Register for theme updates
+        table.insert(ThemeObjects, {
+            Object = btn, 
+            Property = "BackgroundColor3",
+            -- Only update if it's active
+            Update = function(color)
+                if Settings[configKey] then
+                    btn.BackgroundColor3 = color
+                end
+            end
+        })
+        
         local btnCorner = Instance.new("UICorner")
         btnCorner.CornerRadius = UDim.new(0, 4)
         btnCorner.Parent = btn
         
         btn.MouseButton1Click:Connect(function()
             Settings[configKey] = not Settings[configKey]
-            UpdateLoaderConfig(configKey, Settings[configKey]) -- Update Global Config
+            UpdateLoaderConfig(configKey, Settings[configKey]) 
             btn.BackgroundColor3 = Settings[configKey] and Config.Colors.Accent or Color3.fromRGB(60,60,60)
             SaveSettings()
             Notify(name .. (Settings[configKey] and " Enabled" or " Disabled"))
-            Log("Toggled " .. name .. ": " .. tostring(Settings[configKey]))
         end)
     end
+    
+    -- Logger Mode Helper
+    local function SetLoggerMode(external)
+        if external then
+            LoggerPage.Parent = HubGui
+            LoggerPage.Size = UDim2.new(0, 320, 0, 220)
+            LoggerPage.Position = UDim2.new(1, -340, 1, -240)
+            LoggerPage.BackgroundTransparency = 0.2
+            LoggerPage.BackgroundColor3 = Config.Colors.CardBackground
+            LoggerStroke.Transparency = 0
+            LoggerPage.Visible = true
+        else
+            LoggerPage.Parent = ContentArea
+            LoggerPage.Size = UDim2.new(1, 0, 1, 0)
+            LoggerPage.Position = UDim2.new(0, 0, 0, 0)
+            LoggerPage.BackgroundTransparency = 1
+            LoggerStroke.Transparency = 1
+            LoggerPage.Visible = false
+        end
+        Settings.LoggerExternal = external
+        SaveSettings()
+    end
+    
+    -- Settings Page Content
+    
+    -- Section: Theme
+    local ThemeHeader = Instance.new("TextLabel")
+    ThemeHeader.Size = UDim2.new(1, 0, 0, 30)
+    ThemeHeader.BackgroundTransparency = 1
+    ThemeHeader.Text = "Theme Settings (RGB)"
+    ThemeHeader.TextColor3 = Config.Colors.SubText
+    ThemeHeader.Font = Enum.Font.GothamBold
+    ThemeHeader.TextSize = 16
+    ThemeHeader.Parent = SettingsPage
+
+    local function CreateSlider(name, min, max, default, callback)
+        local frame = Instance.new("Frame")
+        frame.Size = UDim2.new(1, 0, 0, 50)
+        frame.BackgroundTransparency = 1
+        frame.Parent = SettingsPage
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, 0, 0, 20)
+        label.BackgroundTransparency = 1
+        label.Text = name
+        label.TextColor3 = Config.Colors.Text
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Font = Enum.Font.Gotham
+        label.TextSize = 14
+        label.Position = UDim2.new(0, 10, 0, 0)
+        label.Parent = frame
+
+        local sliderBg = Instance.new("Frame")
+        sliderBg.Size = UDim2.new(0.9, 0, 0, 6)
+        sliderBg.Position = UDim2.new(0.05, 0, 0, 30)
+        sliderBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        sliderBg.BorderSizePixel = 0
+        sliderBg.Parent = frame
+        
+        local sliderCorner = Instance.new("UICorner")
+        sliderCorner.CornerRadius = UDim.new(1, 0)
+        sliderCorner.Parent = sliderBg
+
+        local sliderFill = Instance.new("Frame")
+        sliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0)
+        sliderFill.BackgroundColor3 = Config.Colors.Accent
+        sliderFill.BorderSizePixel = 0
+        sliderFill.Parent = sliderBg
+        RegisterTheme(sliderFill, "BackgroundColor3")
+
+        local fillCorner = Instance.new("UICorner")
+        fillCorner.CornerRadius = UDim.new(1, 0)
+        fillCorner.Parent = sliderFill
+
+        local trigger = Instance.new("TextButton")
+        trigger.Size = UDim2.new(1, 0, 1, 0)
+        trigger.BackgroundTransparency = 1
+        trigger.Text = ""
+        trigger.Parent = sliderBg
+        
+        local valLabel = Instance.new("TextLabel")
+        valLabel.Size = UDim2.new(0, 50, 0, 20)
+        valLabel.Position = UDim2.new(1, -60, 0, -25)
+        valLabel.BackgroundTransparency = 1
+        valLabel.Text = tostring(default)
+        valLabel.TextColor3 = Config.Colors.SubText
+        valLabel.TextXAlignment = Enum.TextXAlignment.Right
+        valLabel.Font = Enum.Font.Gotham
+        valLabel.TextSize = 12
+        valLabel.Parent = frame
+
+        local isDragging = false
+        
+        local function Update(input)
+            local pos = input.Position.X
+            local rPos = pos - sliderBg.AbsolutePosition.X
+            local pct = math.clamp(rPos / sliderBg.AbsoluteSize.X, 0, 1)
+            sliderFill.Size = UDim2.new(pct, 0, 1, 0)
+            local value = math.floor(min + (max - min) * pct)
+            valLabel.Text = tostring(value)
+            callback(value)
+        end
+
+        trigger.MouseButton1Down:Connect(function()
+            isDragging = true
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                isDragging = false
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                Update(input)
+            end
+        end)
+    end
+
+    CreateSlider("Red", 0, 255, Settings.ThemeR, function(v)
+        Settings.ThemeR = v
+        UpdateTheme()
+    end)
+    
+    CreateSlider("Green", 0, 255, Settings.ThemeG, function(v)
+        Settings.ThemeG = v
+        UpdateTheme()
+    end)
+    
+    CreateSlider("Blue", 0, 255, Settings.ThemeB, function(v)
+        Settings.ThemeB = v
+        UpdateTheme()
+    end)
+
+    -- Section: UI Options
+    local UIHeader = Instance.new("TextLabel")
+    UIHeader.Size = UDim2.new(1, 0, 0, 30)
+    UIHeader.BackgroundTransparency = 1
+    UIHeader.Text = "UI Options"
+    UIHeader.TextColor3 = Config.Colors.SubText
+    UIHeader.Font = Enum.Font.GothamBold
+    UIHeader.TextSize = 16
+    UIHeader.Parent = SettingsPage
+
+    -- External Logger Toggle
+    local LoggerToggleFrame = Instance.new("Frame")
+    LoggerToggleFrame.Size = UDim2.new(1, 0, 0, 35)
+    LoggerToggleFrame.BackgroundTransparency = 1
+    LoggerToggleFrame.BackgroundColor3 = Color3.new(0,0,0)
+    LoggerToggleFrame.Parent = SettingsPage
+    
+    local lgLabel = Instance.new("TextLabel")
+    lgLabel.Size = UDim2.new(0.7, 0, 1, 0)
+    lgLabel.Position = UDim2.new(0, 10, 0, 0)
+    lgLabel.BackgroundTransparency = 1
+    lgLabel.Text = "External Logger (Bottom Right)"
+    lgLabel.TextColor3 = Config.Colors.Text
+    lgLabel.TextXAlignment = Enum.TextXAlignment.Left
+    lgLabel.Font = Enum.Font.Gotham
+    lgLabel.TextSize = 14
+    lgLabel.Parent = LoggerToggleFrame
+    
+    local lgBtn = Instance.new("TextButton")
+    lgBtn.Size = UDim2.new(0, 24, 0, 24)
+    lgBtn.AnchorPoint = Vector2.new(1, 0.5)
+    lgBtn.Position = UDim2.new(1, -10, 0.5, 0)
+    lgBtn.BackgroundColor3 = Settings.LoggerExternal and Config.Colors.Accent or Color3.fromRGB(60,60,60)
+    lgBtn.Text = ""
+    lgBtn.Parent = LoggerToggleFrame
+    
+    local lgCorner = Instance.new("UICorner")
+    lgCorner.CornerRadius = UDim.new(0, 4)
+    lgCorner.Parent = lgBtn
+    
+    lgBtn.MouseButton1Click:Connect(function()
+        local newState = not Settings.LoggerExternal
+        SetLoggerMode(newState)
+        lgBtn.BackgroundColor3 = newState and Config.Colors.Accent or Color3.fromRGB(60,60,60)
+    end)
+    
+    -- Apply initial logger mode
+    if Settings.LoggerExternal then
+        SetLoggerMode(true)
+    end
+
 
     local function CreateNumberInput(name, configKey)
         local frame = Instance.new("Frame")
@@ -835,6 +1111,17 @@ end
             Log("Updated " .. name)
         end)
     end
+
+    CreateToggle("Auto-DJ", "AutoDJ")
+    CreateToggle("Auto-Chain", "AutoChain")
+    CreateToggle("Auto-Skip", "AutoSkip")
+    CreateToggle("Anti-Lag", "AntiLag")
+    CreateToggle("Auto Pickups", "AutoPickups")
+    CreateToggle("Anti-AFK", "AntiAFK")
+    CreateToggle("Claim Rewards", "ClaimRewards")
+    CreateToggle("Send Webhook", "SendWebhook")
+    CreateNumberInput("Timescale (0 = Off)", "Timescale")
+    CreateTextInput("Webhook URL", "WebhookURL", "Paste Webhook URL...")
 
     Log("Main Hub Loaded Successfully.")
     Log("Welcome, " .. Player.Name)
