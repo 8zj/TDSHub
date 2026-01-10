@@ -343,6 +343,7 @@ end
     ToggleBtn.TextColor3 = Config.Colors.Text
     ToggleBtn.Font = Enum.Font.GothamBold
     ToggleBtn.TextSize = 14
+    ToggleBtn.ZIndex = 20 -- Ensure always on top
     ToggleBtn.Parent = HubGui
     
     local ToggleCorner = Instance.new("UICorner")
@@ -379,12 +380,12 @@ end
     Window.Position = UDim2.new(0.5, 0, 0.5, 0)
     Window.Size = IsMobile and UDim2.new(0.85, 0, 0.6, 0) or UDim2.new(0, 550, 0, 380) -- Slightly taller for footer
     Window.BackgroundColor3 = Config.Colors.CardBackground
-    Window.BackgroundTransparency = Config.CardTransparency
+    Window.BackgroundTransparency = 0 -- Fully opaque to prevent "faded" look
     Window.BorderSizePixel = 0
     Window.Active = true
     Window.Draggable = true
     Window.ClipsDescendants = true
-    Window.ZIndex = 2
+    Window.ZIndex = 10 -- Bring window to front
     Window.Parent = HubGui
 
     local WinCorner = Instance.new("UICorner")
@@ -427,7 +428,7 @@ end
     Footer.Size = UDim2.new(1, 0, 0, 30)
     Footer.Position = UDim2.new(0, 0, 1, -30)
     Footer.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-    Footer.BackgroundTransparency = 0.5
+    Footer.BackgroundTransparency = 0.2
     Footer.BorderSizePixel = 0
     Footer.ZIndex = 3
     Footer.Parent = Window
@@ -474,7 +475,7 @@ end
     TabContainer.Size = UDim2.new(0, 120, 1, -71) -- Adjusted for header + footer
     TabContainer.Position = UDim2.new(0, 0, 0, 41)
     TabContainer.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-    TabContainer.BackgroundTransparency = 0.5
+    TabContainer.BackgroundTransparency = 0.2 -- Less transparent
     TabContainer.BorderSizePixel = 0
     TabContainer.ZIndex = 10
     TabContainer.Parent = Window
@@ -1044,6 +1045,7 @@ end
         input.BackgroundColor3 = Color3.fromRGB(40,40,40)
         input.Text = tostring(Settings[configKey] or 0)
         input.TextColor3 = Config.Colors.Text
+        input.PlaceholderColor3 = Color3.fromRGB(180, 180, 180)
         input.TextTransparency = 0
         input.ZIndex = 5
         input.Parent = frame
@@ -1093,6 +1095,7 @@ end
         input.BackgroundColor3 = Color3.fromRGB(40,40,40)
         input.Text = Settings[configKey] or ""
         input.PlaceholderText = placeholder or "..."
+        input.PlaceholderColor3 = Color3.fromRGB(180, 180, 180) -- Brighter placeholder
         input.TextColor3 = Config.Colors.Text
         input.TextTransparency = 0
         input.ZIndex = 5
