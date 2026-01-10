@@ -4,7 +4,6 @@ local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local HttpService = game:GetService("HttpService")
 local UserInputService = game:GetService("UserInputService")
-
 -- Determine parent (handle exploit environment vs studio)
 local Player = Players.LocalPlayer
 local Parent = (gethui and gethui()) or (game:GetService("CoreGui")) or (Player and Player:WaitForChild("PlayerGui"))
@@ -642,8 +641,13 @@ end
         lbl.Font = Enum.Font.Code
         lbl.TextSize = 13
         lbl.TextTransparency = 0
-        lbl.ZIndex = 5
+        lbl.ZIndex = 10 -- Increased ZIndex
         lbl.Parent = LoggerPage
+        
+        local stroke = Instance.new("UIStroke")
+        stroke.Color = Color3.new(0,0,0)
+        stroke.Thickness = 1
+        stroke.Parent = lbl
         
         task.delay(0.05, function()
             LoggerPage.CanvasPosition = Vector2.new(0, LoggerPage.AbsoluteCanvasSize.Y)
@@ -750,8 +754,6 @@ end
     CreateTabBtn("Welcome", WelcomePage)
     CreateTabBtn("Logger", LoggerPage)
     CreateTabBtn("Settings", SettingsPage)
-    CreateTabBtn("Config", ConfigPage) -- Re-added as requested "Main menu has a settings tab" (and implying restore config)
-    
     -- Function to update theme dynamically
     local function UpdateTheme()
         local c = Color3.fromRGB(Settings.ThemeR, Settings.ThemeG, Settings.ThemeB)
@@ -842,6 +844,7 @@ end
             LoggerPage.BackgroundColor3 = Config.Colors.CardBackground
             LoggerStroke.Transparency = 0
             LoggerPage.Visible = true
+            LoggerPage.ZIndex = 30 -- Ensure on top
         else
             LoggerPage.Parent = ContentArea
             LoggerPage.Size = UDim2.new(1, 0, 1, 0)
@@ -849,6 +852,7 @@ end
             LoggerPage.BackgroundTransparency = 1
             LoggerStroke.Transparency = 1
             LoggerPage.Visible = false
+            LoggerPage.ZIndex = 1 -- Reset
         end
         Settings.LoggerExternal = external
         SaveSettings()
@@ -864,12 +868,14 @@ end
     ThemeHeader.TextColor3 = Config.Colors.SubText
     ThemeHeader.Font = Enum.Font.GothamBold
     ThemeHeader.TextSize = 16
+    ThemeHeader.ZIndex = 5
     ThemeHeader.Parent = SettingsPage
 
     local function CreateSlider(name, min, max, default, callback)
         local frame = Instance.new("Frame")
         frame.Size = UDim2.new(1, 0, 0, 50)
         frame.BackgroundTransparency = 1
+        frame.ZIndex = 5
         frame.Parent = SettingsPage
 
         local label = Instance.new("TextLabel")
@@ -881,6 +887,7 @@ end
         label.Font = Enum.Font.Gotham
         label.TextSize = 14
         label.Position = UDim2.new(0, 10, 0, 0)
+        label.ZIndex = 5
         label.Parent = frame
 
         local sliderBg = Instance.new("Frame")
@@ -888,6 +895,7 @@ end
         sliderBg.Position = UDim2.new(0.05, 0, 0, 30)
         sliderBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         sliderBg.BorderSizePixel = 0
+        sliderBg.ZIndex = 5
         sliderBg.Parent = frame
         
         local sliderCorner = Instance.new("UICorner")
@@ -898,6 +906,7 @@ end
         sliderFill.Size = UDim2.new((default - min)/(max - min), 0, 1, 0)
         sliderFill.BackgroundColor3 = Config.Colors.Accent
         sliderFill.BorderSizePixel = 0
+        sliderFill.ZIndex = 6
         sliderFill.Parent = sliderBg
         RegisterTheme(sliderFill, "BackgroundColor3")
 
@@ -909,6 +918,7 @@ end
         trigger.Size = UDim2.new(1, 0, 1, 0)
         trigger.BackgroundTransparency = 1
         trigger.Text = ""
+        trigger.ZIndex = 10
         trigger.Parent = sliderBg
         
         local valLabel = Instance.new("TextLabel")
@@ -920,6 +930,7 @@ end
         valLabel.TextXAlignment = Enum.TextXAlignment.Right
         valLabel.Font = Enum.Font.Gotham
         valLabel.TextSize = 12
+        valLabel.ZIndex = 5
         valLabel.Parent = frame
 
         local isDragging = false
@@ -974,6 +985,7 @@ end
     UIHeader.TextColor3 = Config.Colors.SubText
     UIHeader.Font = Enum.Font.GothamBold
     UIHeader.TextSize = 16
+    UIHeader.ZIndex = 5
     UIHeader.Parent = SettingsPage
 
     -- External Logger Toggle
@@ -981,6 +993,7 @@ end
     LoggerToggleFrame.Size = UDim2.new(1, 0, 0, 35)
     LoggerToggleFrame.BackgroundTransparency = 1
     LoggerToggleFrame.BackgroundColor3 = Color3.new(0,0,0)
+    LoggerToggleFrame.ZIndex = 5
     LoggerToggleFrame.Parent = SettingsPage
     
     local lgLabel = Instance.new("TextLabel")
@@ -992,6 +1005,7 @@ end
     lgLabel.TextXAlignment = Enum.TextXAlignment.Left
     lgLabel.Font = Enum.Font.Gotham
     lgLabel.TextSize = 14
+    lgLabel.ZIndex = 5
     lgLabel.Parent = LoggerToggleFrame
     
     local lgBtn = Instance.new("TextButton")
@@ -1000,6 +1014,7 @@ end
     lgBtn.Position = UDim2.new(1, -10, 0.5, 0)
     lgBtn.BackgroundColor3 = Settings.LoggerExternal and Config.Colors.Accent or Color3.fromRGB(60,60,60)
     lgBtn.Text = ""
+    lgBtn.ZIndex = 5
     lgBtn.Parent = LoggerToggleFrame
     
     local lgCorner = Instance.new("UICorner")
@@ -1114,17 +1129,6 @@ end
             Log("Updated " .. name)
         end)
     end
-
-    CreateToggle("Auto-DJ", "AutoDJ")
-    CreateToggle("Auto-Chain", "AutoChain")
-    CreateToggle("Auto-Skip", "AutoSkip")
-    CreateToggle("Anti-Lag", "AntiLag")
-    CreateToggle("Auto Pickups", "AutoPickups")
-    CreateToggle("Anti-AFK", "AntiAFK")
-    CreateToggle("Claim Rewards", "ClaimRewards")
-    CreateToggle("Send Webhook", "SendWebhook")
-    CreateNumberInput("Timescale (0 = Off)", "Timescale")
-    CreateTextInput("Webhook URL", "WebhookURL", "Paste Webhook URL...")
 
     Log("Main Hub Loaded Successfully.")
     Log("Welcome, " .. Player.Name)
