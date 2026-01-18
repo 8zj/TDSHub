@@ -189,7 +189,7 @@ function PickHubUI:CreateUI()
     local title_label = Instance.new("TextLabel", main_frame)
     title_label.Size = UDim2.new(1, -10, 0, 25)
     title_label.Position = UDim2.new(0, 10, 0, 5)
-    title_label.Text = "PICKHUB v2"
+    title_label.Text = "PICKHUB v2   | .gg/WDeDX54hAy"
     title_label.TextColor3 = Color3.fromRGB(255, 255, 255)
     title_label.BackgroundTransparency = 1
     title_label.Font = Enum.Font.Code
@@ -296,7 +296,7 @@ function PickHubUI:CreateUI()
         
         local loadout_text = ""
         for i = 1, 5 do
-            local t = towers[i] or "Empty"
+            local t = towers[i] or "None"
             loadout_text = loadout_text .. i .. ". " .. t .. "\n"
         end
         loadout_list.Text = loadout_text
@@ -319,7 +319,7 @@ function PickHubUI:CreateUI()
         
         set_progress(0.7, "Scanning Game Data...")
         update_ui_info()
-        task.wait(0.6)
+        task.wait(0.9)
         
         set_progress(1, "Ready!")
         task.wait(0.5)
