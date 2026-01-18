@@ -3,7 +3,6 @@
 
 local PickHubUI = {}
 
--- Colors for logging
 local COLORS = {
     green = Color3.fromRGB(0, 255, 0),
     red = Color3.fromRGB(255, 0, 0),
@@ -13,6 +12,26 @@ local COLORS = {
     orange = Color3.fromRGB(255, 165, 0),
     purple = Color3.fromRGB(128, 0, 128)
 }
+
+local function get_env_table()
+    if getenv then
+        return getenv()
+    end
+    if getgenv then
+        return getgenv()
+    end
+    return _G
+end
+
+local function resolve_color(color)
+    if typeof(color) == "Color3" then
+        return color
+    end
+    if typeof(color) == "string" then
+        return COLORS[color] or COLORS.white
+    end
+    return COLORS.white
+end
 
 -- Create the UI
 function PickHubUI:CreateUI()
@@ -108,13 +127,12 @@ function PickHubUI:CreateUI()
     return ScreenGui
 end
 
--- Log function (what you asked for)
-function PickHubUI:log(text, colorName)
+function PickHubUI:log(text, color)
     if not self.ScrollFrame then
         self:CreateUI()
     end
     
-    local color = COLORS[colorName] or COLORS.white
+    local color3 = resolve_color(color)
     
     local logLabel = Instance.new("TextLabel")
     logLabel.Name = "Log"
@@ -123,7 +141,7 @@ function PickHubUI:log(text, colorName)
     logLabel.Size = UDim2.new(1, 0, 0, 20)
     logLabel.Font = Enum.Font.Code
     logLabel.Text = "[PickHub] " .. text
-    logLabel.TextColor3 = color
+    logLabel.TextColor3 = color3
     logLabel.TextSize = 12
     logLabel.TextXAlignment = Enum.TextXAlignment.Left
     logLabel.TextWrapped = true
@@ -136,28 +154,35 @@ function PickHubUI:log(text, colorName)
     print("[PickHub] " .. text)
 end
 
--- Alias for log (what you asked for)
 function PickHubUI:logs(text, colorName)
     self:log(text, colorName)
 end
 
--- Initialize
 function PickHubUI:Init()
     self:CreateUI()
     self:log("Console initialized", "green")
     return self
 end
 
--- Make it global so you can call it from Hub.lua
-getgenv().PickHubUI = PickHubUI:Init()
+local env = get_env_table()
+env.PickHubUI = PickHubUI:Init()
 
--- Export the functions globally
-getgenv().log = function(text, color)
+local function global_log(text, color)
     PickHubUI:log(text, color)
 end
 
-getgenv().logs = function(text, color)
+local function global_logs(text, color)
     PickHubUI:logs(text, color)
 end
+
+env.Log = global_log
+env.log = global_log
+env.Logs = global_logs
+env.logs = global_logs
+
+_G.Log = global_log
+_G.log = global_log
+_G.Logs = global_logs
+_G.logs = global_logs
 
 return PickHubUI
