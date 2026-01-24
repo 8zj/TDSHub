@@ -427,9 +427,26 @@ function TDS:Addons()
     return true
 end
 
+local function normalize_macro_url(url)
+    if type(url) ~= "string" then
+        return ""
+    end
+
+    local cleaned = url:gsub("^%s+", ""):gsub("%s+$", "")
+    cleaned = cleaned:gsub("^['\"`]+", ""):gsub("['\"`]+$", "")
+    cleaned = cleaned:gsub("%s", "")
+    return cleaned
+end
+
 getgenv().macro = function(url)
+    local cleaned_url = normalize_macro_url(url)
+    if cleaned_url == "" then
+        warn("Failed to fetch macro from URL:", "empty or invalid MacroURL")
+        return
+    end
+
     local success, response = pcall(function()
-        return game:HttpGet(url)
+        return game:HttpGet(cleaned_url)
     end)
 
     if success then
@@ -447,7 +464,11 @@ end
 if _G.MacroURL and _G.MacroURL ~= "" then
     task.spawn(function()
         task.wait(1) -- Short delay to ensure initialization
-        getgenv().macro(_G.MacroURL)
+        local cleaned_url = normalize_macro_url(_G.MacroURL)
+        if cleaned_url ~= "" then
+            _G.MacroURL = cleaned_url
+            getgenv().macro(cleaned_url)
+        end
     end)
 end
 
