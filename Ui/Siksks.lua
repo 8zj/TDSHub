@@ -18,10 +18,15 @@ local file_name = "ADS_Config.json"
 
 task.spawn(function()
     local function disable_idled()
+        if type(getconnections) ~= "function" then
+            return
+        end
         local success, connections = pcall(getconnections, local_player.Idled)
-        if success then
+        if success and type(connections) == "table" then
             for _, v in pairs(connections) do
-                v:Disable()
+                if v and v.Disable then
+                    v:Disable()
+                end
             end
         end
     end
